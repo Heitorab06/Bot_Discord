@@ -2,6 +2,7 @@ from discord.ext import commands
 import discord
 import os
 import random
+import asyncio
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -18,14 +19,23 @@ bot = commands.Bot(
 
 @bot.event
 async def on_ready():
-    print(f"Logado como {bot.user}")
-
-@bot.command()
-async def ping(ctx:commands.Context):
-    await ctx.send("pong")
     
-@bot.command()
-async def sortear(ctx:commands.Context, n1:int, n2:int):
-    await ctx.reply(random.randint(n1, n2))
+    synced = await bot.tree.sync()
+    print(f"Logado como {bot.user}")
+    print(f"{len(synced)} comandos sincronizados")
+    
+    for c in bot.tree.get_commands():
+        print(c.name)
 
-bot.run(TOKEN)
+
+async def main():
+    async with bot:
+        
+        await bot.load_extension("cogs.sorteio")
+        await bot.load_extension("cogs.ping")
+        
+        await bot.start(TOKEN)
+    
+    
+asyncio.run(main())
+
